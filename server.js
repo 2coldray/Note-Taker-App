@@ -40,7 +40,7 @@ let id = 0;
 app.post("/api/notes", (req, res) => {
   try {
     //Read in Note
-    let note = fs.readFileSync("./db/db.json");
+    let note = fs.readFileSync("./db/db.json", "utf8");
     note = JSON.parse(note);
     //Use for loop to loop through body and assign id to note in db, adding by one
     for (let i = 0; i < db.length; i++) {
@@ -49,11 +49,31 @@ app.post("/api/notes", (req, res) => {
     req.body.id = id;
     note.push(req.body);
     //Write File to DB
-    fs.writeFile("./db/db.json", JSON.stringify(note), (err) => {
+    fs.writeFile("./db/db.json", JSON.stringify(note), "utf8",(err) => {
       if (err) throw err;
       console.log("Successfully wrote new note to db");
     });
     res.json(req.body);
+  } catch (err) {
+    throw err;
+  }
+})
+//=======================================================================================
+//Delete routes
+
+app.delete("/api/notes/:id", (req, res) => {
+  try {
+    //Read in note
+    let note = fs.readFileSync("./db/db.json", "utf8")
+    note = JSON.parse(note);
+    //need to filter note by id
+    note = note.filter((note) => note.id != req.params.id);
+    //Write new file to id
+    fs.writeFile("./db/db.json", JSON.stringify(note), "utf8", (err) => {
+      if (err) throw err;
+      console.log("Successfully deleted note")
+    })
+    res.json(JSON.parse(note))
   } catch (err) {
     throw err;
   }
