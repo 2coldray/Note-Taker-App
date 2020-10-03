@@ -31,7 +31,33 @@ app.get("/notes", (req, res) => {
 app.get("/api/notes", (req, res) => {
   res.json(db);
 })
+//==============================================================
+//Post Routes
 
+//Make variable for id that will update
+let id = 0;
+
+app.post("/api/notes", (req, res) => {
+  try {
+    //Read in Note
+    let note = fs.readFileSync("./db/db.json");
+    note = JSON.parse(note);
+    //Use for loop to loop through body and assign id to note in db, adding by one
+    for (let i = 0; i < db.length; i++) {
+      id++;
+    }
+    req.body.id = id;
+    note.push(req.body);
+    //Write File to DB
+    fs.writeFile("./db/db.json", JSON.stringify(note), (err) => {
+      if (err) throw err;
+      console.log("Successfully wrote new note to db");
+    });
+    res.json(req.body);
+  } catch (err) {
+    throw err;
+  }
+})
 
 
 
