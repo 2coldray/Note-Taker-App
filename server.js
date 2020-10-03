@@ -73,7 +73,7 @@ app.delete("/api/notes/:id", (req, res) => {
       if (err) throw err;
       console.log("Successfully deleted note")
     })
-    res.json(JSON.parse(note))
+    res.json(req.body)
   } catch (err) {
     throw err;
   }
