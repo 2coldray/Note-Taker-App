@@ -15,16 +15,24 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static("public"));
 
-//Html Get Routes
+//Get Routes
+
+//Html home
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "/public/index.html"))
 });
 
+//notes html
 app.get("/notes", (req, res) => {
   res.sendFile(path.join(__dirname, "./public/notes.html"))
 });
 
-//Api Routes
+//notes api
+app.get("/api/notes", (req, res) => {
+  res.json(db);
+})
+
+
 
 
 //Listen to Port
