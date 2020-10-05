@@ -2,7 +2,6 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
-let db = require("./db/db.json");
 
 //Create Express server
 const app = express();
@@ -19,68 +18,75 @@ app.use(express.static("public"));
 
 //Html home
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "/public/index.html"))
+  res.sendFile(path.join(__dirname, "/public/index.html"));
 });
 
 //notes html
 app.get("/notes", (req, res) => {
-  res.sendFile(path.join(__dirname, "./public/notes.html"))
+  res.sendFile(path.join(__dirname, "./public/notes.html"));
 });
+
+//Make variable for id that will update
+const DB_PATH = "./db/db.json";
+const getDB = () => JSON.parse(fs.readFileSync(DB_PATH, "utf8"));
+const saveDB = (obj) => fs.writeFileSync(DB_PATH, JSON.stringify(obj));
 
 //notes api
 app.get("/api/notes", (req, res) => {
+  //Read in Note
+  let db = getDB();
   res.json(db);
-})
+});
+
 //==============================================================
 //Post Routes
-
-//Make variable for id that will update
-let id = 0;
 
 app.post("/api/notes", (req, res) => {
   try {
     //Read in Note
-    let note = fs.readFileSync("./db/db.json", "utf8");
-    note = JSON.parse(note);
-    //Use for loop to loop through body and assign id to note in db, adding by one
-    for (let i = 0; i < db.length; i++) {
-      id++;
+    let db = getDB();
+
+    //Set new ID
+    let id;
+    if(db.length){
+      id = db[db.length - 1].id + 1;
+    } else {
+      id = 1;
     }
+
     req.body.id = id;
-    note.push(req.body);
+
+    //Add to data collection
+    db.push(req.body);
+
     //Write File to DB
-    fs.writeFile("./db/db.json", JSON.stringify(note), "utf8",(err) => {
-      if (err) throw err;
-      console.log("Successfully wrote new note to db");
-    });
+    saveDB(db);
+
     res.json(req.body);
   } catch (err) {
-    throw err;
+    console.log(err);
   }
-})
+});
 //=======================================================================================
 //Delete routes
 
 app.delete("/api/notes/:id", (req, res) => {
   try {
     //Read in note
-    let note = fs.readFileSync("./db/db.json", "utf8")
-    note = JSON.parse(note);
+    let db = getDB();
+    
     //need to filter note by id
-    note = note.filter((note) => note.id != req.params.id);
+    db = db.filter((note) => note.id != req.params.id);
+    
     //Write new file to id
-    fs.writeFile("./db/db.json", JSON.stringify(note), "utf8", (err) => {
-      if (err) throw err;
-      console.log("Successfully deleted note")
-    })
-    res.json(req.body)
+    saveDB(db);
+    res.json(req.body);
   } catch (err) {
     throw err;
   }
-})
-
+});
 
 //Listen to Port
-app.listen(PORT, function() {
-    console.log("App listening on PORT: " + PORT);
-  });
+app.listen(PORT, function () {
+  console.log("App listening on PORT: " + PORT);
+});
